@@ -58,7 +58,15 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 if [ -z "$NO_BUILD" ]; then
     echo "Building Docker image..."
-    docker build -t ${REPOSITORY} ${DOCKERFILE_DIR}
+    if [ -f ${DOCKERFILE_DIR}/build-args.env ]; then
+        # build-args.env exists
+        ENVS=""
+        while read LINE; do
+            ENVS="${ENVS} --build-arg ${LINE}"
+        done < ${DOCKERFILE_DIR}/proxy.env
+    fi
+
+    docker build ${ENVS} -t ${REPOSITORY} ${DOCKERFILE_DIR}
 else
     echo "Skip building Docker image."
 fi
