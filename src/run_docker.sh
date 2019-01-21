@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-PROJECT_NAME=TFBootstrap
-CONTAINER_BASENAME=tf-bootstrap
+PROJECT_NAME=GenModels
+CONTAINER_BASENAME=gen-models
 DOCKERFILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPOSITORY="$USER/$CONTAINER_BASENAME"
 PORT=""
-DEVICE_ID="7"
 ARGS=""
 
 # Check command
@@ -13,17 +12,10 @@ CMD=$1
 shift
 
 if [ ${CMD} = "train" ] || [ ${CMD} = "export" ] || [ ${CMD} = "eval" ] || [ ${CMD} = "serve" ] || [ ${CMD} = "notebook" ]; then
-    DEVICE_ID=$1
-    shift
-    if [ -z "$DEVICE_ID" ]; then
-        echo "Usage: run_docker.sh ${CMD} DEVICE_ID"
-        exit 1
-    fi
-
-    CONTAINER_NAME="$CONTAINER_BASENAME-${CMD}-${DEVICE_ID//,/-}"
+    CONTAINER_NAME="$CONTAINER_BASENAME-${CMD}"
 
     if [ ${CMD} = "serve" ]; then
-        PORT="-p 900${DEVICE_ID}:9000"
+        PORT="-p 9000:9000"
     elif [ ${CMD} = "notebook" ]; then
         PORT="-p 8888:8888"
     fi
@@ -36,7 +28,7 @@ elif [ ${CMD} = "build" ]; then
     echo "Only build Docker image."
     JUST_BUILD=YES
 else
-    echo "Usage: run_docker.sh [train|export|eval|serve|notebook|tensorboard|encode|build] [DEVICE_ID]"
+    echo "Usage: run_docker.sh [train|export|eval|serve|notebook|tensorboard|encode|build]"
     exit 1
 fi
 
@@ -105,8 +97,7 @@ echo "Removing the existing container..."
 docker rm ${CONTAINER_NAME}
 
 # Run docker container
-docker run --runtime=nvidia \
-    -e "CUDA_VISIBLE_DEVICES=${DEVICE_ID}" \
+docker run \
     -e "PASSWORD=${NOTEBOOK_PASSWD}" \
     --name ${CONTAINER_NAME} \
     ${PORT} \

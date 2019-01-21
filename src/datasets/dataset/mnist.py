@@ -29,7 +29,7 @@ class MNIST(BaseDataset):
     @staticmethod
     def map_fn(image, label, _id):
         return {
-                   'image': normalize(image),
+                   'image': tf.image.convert_image_dtype(image, tf.float32),
                    '_id': _id,
                }, tf.to_float(label)
 

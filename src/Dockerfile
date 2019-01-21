@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:1.12.0-gpu-py3 as base
+FROM tensorflow/tensorflow:1.12.0-py3 as base
 
 MAINTAINER Sanghoon Yoon <shygiants@gmail.com>
 
@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -y install libsm6 libice6 libxrender1 libxext6 lib
 #######################
 # Install pip modules #
 #######################
-FROM tensorflow/tensorflow:1.12.0-gpu-py3 as pip
+FROM tensorflow/tensorflow:1.12.0-py3 as pip
 
 COPY requirements.txt .
 RUN pip install -r ./requirements.txt
@@ -18,7 +18,7 @@ RUN pip install -r ./requirements.txt
 ########
 # MAIN #
 ########
-FROM tensorflow/tensorflow:1.12.0-gpu-py3
+FROM tensorflow/tensorflow:1.12.0-py3
 
 # Copy libraries
 COPY --from=base /usr/lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu

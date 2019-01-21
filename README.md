@@ -1,6 +1,12 @@
-# TensorFlow Boilerplate
+# Generative Models
 
-A boilerplate for a TensorFlow project
+Implementations of generative models
+
+## Datasets
+* [MNIST](/src/datasets/dataset/mnist.py)
+
+## Models
+* [VAE]()
 
 ## Run
 
