@@ -63,7 +63,7 @@ if [ -z "$NO_BUILD" ]; then
         ENVS=""
         while read LINE; do
             ENVS="${ENVS} --build-arg ${LINE}"
-        done < ${DOCKERFILE_DIR}/proxy.env
+        done < ${DOCKERFILE_DIR}/build-args.env
     fi
 
     docker build ${ENVS} -t ${REPOSITORY} ${DOCKERFILE_DIR}

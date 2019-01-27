@@ -11,9 +11,8 @@ from networks.deep_conv_net import DeepConvNet as DCN
 
 
 class DeepConvNet(Model):
-    def __init__(self, features, labels=None, model_idx=0, model_parallelism=True, device=None, **hparams):
-        Model.__init__(self, features, labels=labels, model_idx=model_idx, model_parallelism=model_parallelism,
-                       device=device, **hparams)
+    def __init__(self, features, labels=None, model_idx=0, device=None, **hparams):
+        Model.__init__(self, features, labels=labels, model_idx=model_idx, device=device, **hparams)
 
         # Define networks
         self.networks.update(dcn=DCN(scope='DeepConvNet', **hparams))
@@ -50,7 +49,7 @@ class DeepConvNet(Model):
 
         optimizer = Optimizer(learning_rate, '', optimizer_params=optimizer_params, decay_params=decay_params)
 
-        dispatcher = Dispatcher(cls, hparams, features, labels=labels, num_towers=1)
+        dispatcher = Dispatcher(cls, hparams, features, labels=labels, num_towers=1, model_parallelism=False)
 
         train_op = dispatcher.minimize(optimizer, lambda m: m.loss, global_step=tf.train.get_or_create_global_step())
 

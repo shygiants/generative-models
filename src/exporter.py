@@ -13,7 +13,9 @@ from tflibs.runner import Runner, ModelInitializer
 
 def run(job_dir,
         model_cls,
-        step):
+        model_args,
+        step,
+        **kwargs):
     def serving_input_receiver_fn():
         decoded_image = tf.placeholder(dtype=tf.uint8,
                                        shape=[28, 28, 1],
@@ -31,7 +33,8 @@ def run(job_dir,
     ##########
     estimator = tf.estimator.Estimator(
         model_cls.model_fn,
-        model_dir=job_dir)
+        model_dir=job_dir,
+        params={'model_args': model_args})
     tf.logging.info(estimator)
 
     #######
