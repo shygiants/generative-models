@@ -38,41 +38,35 @@ class VAE(Model):
         return self.latent_dist.sample()
 
     @Model.tensor
-    def marginal_dist(self):
+    def marginal(self):
         return self.networks.decoder(self.latent_vars)
-
-    @Model.tensor(summary='Marginal_Mean')
-    def marginal_mean(self):
-        return self.marginal_dist.mean()
-
-    @Model.tensor(summary='Marginal_Std')
-    def marginal_std(self):
-        return self.marginal_dist.stddev()
 
     @Model.image(summary='Reconstructed_Images')
     def reconstructed_images(self):
-        return tf.clip_by_value(tf.reshape(self.marginal_dist.sample(), tf.shape(self.example_images)), 0., 1.)
+        return tf.reshape(self.marginal, tf.shape(self.example_images))
+
+    @Model.image
+    def sampled_images(self):
+        return tf.reshape(self.networks.decoder(self.features['z']), (28, 28, 1))
 
     @Model.image(summary='Grouped_Image')
     def images_group(self):
         return concat_images(self.example_images, self.reconstructed_images)
 
-    @Model.loss(summary='Marginal_Likelihood')
-    def marginal_likelihood(self):
+    @Model.loss
+    def reconstruction_loss(self):
         flatten = tf.layers.flatten(self.example_images)
-        return tf.reduce_mean(tf.reduce_sum(self.marginal_dist.log_prob(flatten), axis=-1))
+
+        return tf.losses.mean_squared_error(flatten, self.marginal, scope='Reconstruction_Loss',
+                                            weights=self.hparams.data_size)
 
     @Model.loss(summary='KL_Divergence')
     def kld(self):
         return tf.reduce_mean(tf.reduce_sum(self.latent_dist.kl_divergence(tf.distributions.Normal(0., 1.)), axis=-1))
 
-    @Model.loss(summary='ELBO')
-    def elbo(self):
-        return self.marginal_likelihood - self.kld
-
     @Model.loss
     def loss(self):
-        return - self.elbo
+        return self.kld + self.reconstruction_loss
 
     @classmethod
     def train(cls, features: dict, learning_rate, **hparams):
@@ -85,7 +79,7 @@ class VAE(Model):
 
         chief = dispatcher.chief  # typd: VAE
         tf.logging.info('Explicitly declared summaries')
-        for t in [chief.images_group, chief.latent_mean, chief.latent_std, chief.marginal_mean, chief.marginal_std]:
+        for t in [chief.images_group, chief.latent_mean, chief.latent_std]:
             tf.logging.info(t)
 
         loss = chief.loss
@@ -109,7 +103,8 @@ class VAE(Model):
         chief = cls(features, device=gpu_eval if gpu_eval is not None else 0, **hparams)
 
         predictions = {
-            'reconstruction': tf.image.convert_image_dtype(chief.reconstructed_images, tf.uint8)
+            # 'reconstruction': tf.image.convert_image_dtype(chief.reconstructed_images, tf.uint8),
+            'sample': chief.sampled_images
         }
 
         return tf.estimator.EstimatorSpec(tf.estimator.ModeKeys.PREDICT,

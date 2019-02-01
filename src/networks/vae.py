@@ -31,7 +31,6 @@ class Encoder(Network):
             with arg_scope([tf.layers.dense],
                            kernel_initializer=tf.initializers.random_normal(stddev=0.1),
                            bias_initializer=tf.initializers.random_normal(stddev=0.1)):
-
                 inputs = tf.layers.flatten(inputs)
                 hidden = linear(inputs, num_hidden, norm_fn=Norm.NONE, non_linear_fn=Nonlinear.Tanh)
                 output = linear(hidden, dim_z * 2, norm_fn=Norm.NONE, non_linear_fn=Nonlinear.NONE)
@@ -62,12 +61,7 @@ class Decoder(Network):
             with arg_scope([tf.layers.dense],
                            kernel_initializer=tf.initializers.random_normal(stddev=0.1),
                            bias_initializer=tf.initializers.random_normal(stddev=0.1)):
-
                 hidden = linear(inputs, num_hidden, norm_fn=Norm.NONE, non_linear_fn=Nonlinear.Tanh)
-                output = linear(hidden, data_size * 2, norm_fn=Norm.NONE, non_linear_fn=Nonlinear.NONE)
+                output = linear(hidden, data_size, norm_fn=Norm.NONE, non_linear_fn=Nonlinear.Sigmoid)
 
-                mu, sigma = tf.split(output, 2, axis=-1)
-                mu = tf.nn.sigmoid(mu)
-                sigma = tf.sqrt(tf.math.exp(sigma))
-
-                return tf.distributions.Normal(mu, sigma + 1e-6)
+                return output

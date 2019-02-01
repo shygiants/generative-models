@@ -17,15 +17,21 @@ def run(job_dir,
         step,
         **kwargs):
     def serving_input_receiver_fn():
-        decoded_image = tf.placeholder(dtype=tf.uint8,
-                                       shape=[28, 28, 1],
-                                       name='input_image')
-        image = normalize(decoded_image)
-        image = tf.expand_dims(image, axis=0)
+        # decoded_image = tf.placeholder(dtype=tf.uint8,
+        #                                shape=[28, 28, 1],
+        #                                name='input_image')
+        z = tf.placeholder(dtype=tf.float32,
+                           shape=[3],
+                           name='z')
+        # image = normalize(decoded_image)
+        # image = tf.expand_dims(image, axis=0)
+        latent = tf.expand_dims(z, axis=0)
 
-        receiver_tensors = {'image': decoded_image}
+        # receiver_tensors = {'image': decoded_image, 'z': z}
+        receiver_tensors = {'z': z}
 
-        return tf.estimator.export.ServingInputReceiver({'image': image},
+        # return tf.estimator.export.ServingInputReceiver({'image': image, 'z': latent},
+        return tf.estimator.export.ServingInputReceiver({'z': latent},
                                                         receiver_tensors)
 
     ##########

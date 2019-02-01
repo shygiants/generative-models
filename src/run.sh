@@ -25,8 +25,21 @@ elif [ $1 = "eval" ]; then
         --job-dir $JOB_DIR \
         --dataset-dir $DATASET_DIR \
         "${@:2}"
+elif [ $1 = "predict" ]; then
+    python predictor.py \
+        --job-dir $JOB_DIR \
+        "${@:2}"
 elif [ $1 = "notebook" ]; then
     /run_jupyter.sh --allow-root "${@:2}"
+elif [ $1 = "convert" ]; then
+    RUN_DIR=${JOB_DIR}/$2
+    SAVEDMODEL_PATH=$(ls -d ${RUN_DIR}/*/ | tail -n 1)
+
+    tensorflowjs_converter \
+        --input_format=tf_saved_model \
+        --saved_model_tags=serve \
+        "${@:3}" \
+        ${SAVEDMODEL_PATH} ${SAVEDMODEL_PATH}/tfjs
 else
     echo "Usage: run.sh [train|export|eval|tensorboard|notebook|encode]"
     exit 1
