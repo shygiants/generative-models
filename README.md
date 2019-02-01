@@ -6,7 +6,7 @@ Implementations of generative models
 * [MNIST](/src/datasets/dataset/mnist.py)
 
 ## Models
-* [VAE](/src/models/vae.py)
+* [VAE](/src/models/VAE.md)
 
 ## Powered by
 * See [TensorFlow Boilerplate](https://github.com/shygiants/tensorflow-boilerplate)
