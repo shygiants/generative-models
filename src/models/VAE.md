@@ -6,5 +6,5 @@ An implementation of variational auto-encoder (VAE) for MNIST which is decribed 
 See a demo on my personal website [Sanghoon Yoon](https://shygiants.github.io).
 
 ## Code
-* [VAE Model](/vae.py)
-* [VAE Network](../networks/vae.py)
+* [VAE Model](/src/models/vae.py)
+* [VAE Network](/src/networks/vae.py)
