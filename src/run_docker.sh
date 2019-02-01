@@ -7,6 +7,9 @@ REPOSITORY="$USER/$CONTAINER_BASENAME"
 PORT=""
 ARGS=""
 
+##################
+# Parsing params #
+##################
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -16,6 +19,14 @@ do
         --no-build)
         NO_BUILD=YES
         shift # past argument
+        ;;
+        --cpu)
+        CPU=YES
+        shift
+        ;;
+        --no-build-args)
+        NO_BUILD_ARGS=YES
+        shift
         ;;
         --tensorboard-port)
         shift
@@ -38,13 +49,13 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-
-# Check command
+#################
+# Check command #
+#################
 CMD=$1
 shift
 
-
-if [ ${CMD} = "train" ] || [ ${CMD} = "export" ] || [ ${CMD} = "eval" ] || [ ${CMD} = "serve" ] || [ ${CMD} = "predict" ] || [ ${CMD} = "notebook" ]; then
+if [ ${CMD} = "train" ] || [ ${CMD} = "export" ] || [ ${CMD} = "eval" ] || [ ${CMD} = "serve" ] || [ ${CMD} = "notebook" ]; then
     CONTAINER_NAME="$CONTAINER_BASENAME-${CMD}"
 
     if [ ${CMD} = "serve" ]; then
@@ -57,7 +68,6 @@ if [ ${CMD} = "train" ] || [ ${CMD} = "export" ] || [ ${CMD} = "eval" ] || [ ${C
         # Use GPU acceleration
         DEVICE_ID=$1
         shift
-
         if [ -z "$DEVICE_ID" ]; then
             echo "Usage: run_docker.sh ${CMD} DEVICE_ID"
             exit 1
@@ -67,9 +77,10 @@ if [ ${CMD} = "train" ] || [ ${CMD} = "export" ] || [ ${CMD} = "eval" ] || [ ${C
 
         if [ ${CMD} = "serve" ]; then
             PORT="-p 900${DEVICE_ID}:9000"
+        elif [ ${CMD} = "notebook" ]; then
+            PORT="-p 8888:8888"
         fi
     fi
-
 elif [ ${CMD} = "tensorboard" ]; then
     PORT="-p 6006:6006 -p 6064:6064"
     CONTAINER_NAME="$CONTAINER_BASENAME-tensorboard"
@@ -85,6 +96,9 @@ else
     exit 1
 fi
 
+###############
+# Build image #
+###############
 if [ -z "$CPU" ]; then
     GPU_PARAM="--runtime=nvidia -e \"CUDA_VISIBLE_DEVICES=${DEVICE_ID}\""
     DOCKERFILE="Dockerfile.gpu"
@@ -92,6 +106,10 @@ else
     GPU_PARAM=""
     DOCKERFILE="Dockerfile.cpu"
 fi
+
+# Check command
+CMD=$1
+shift
 
 if [ -z "$NO_BUILD" ]; then
     echo "Building Docker image..."
@@ -112,6 +130,9 @@ if ! [ -z "$JUST_BUILD" ]; then
     exit 0
 fi
 
+#######
+# Run #
+#######
 echo "Running \"${CMD}\"..."
 
 # Check environment variables
