@@ -14,6 +14,7 @@ from tflibs.utils import strip_dict_arg
 def run(job_dir,
         train_iters,
         estimator,
+        model_cls,
         dataset,
         train_batch_size,
         eval_batch_size,
@@ -28,7 +29,6 @@ def run(job_dir,
     # Datasets #
     ############
     dataset_train = dataset.read(split='train')
-    dataset_test = dataset.read(split='test')
 
     #######
     # Run #
@@ -43,10 +43,11 @@ def run(job_dir,
     hooks = []
 
     if not no_eval:
+        dataset_test = dataset.read(split='test')
         hooks.append(EvaluationRunHook(estimator,
                                        build_input_fn(dataset_test,
                                                       eval_batch_size,
-                                                      map_fn=strip_dict_arg(dataset.eval_map_fn),
+                                                      map_fn=strip_dict_arg(model_cls.eval_map_fn),
                                                       shuffle_and_repeat=False),
                                        eval_steps,
                                        summary=False))
@@ -56,7 +57,7 @@ def run(job_dir,
     # Run training for `train_iters` times
     estimator.train(build_input_fn(dataset_train,
                                    train_batch_size,
-                                   map_fn=strip_dict_arg(dataset.map_fn),
+                                   map_fn=strip_dict_arg(model_cls.map_fn),
                                    num_parallel_batches=num_parallel_batches,
                                    shuffle_buffer_size=shuffle_buffer_size,
                                    prefetch_buffer_size=prefetch_buffer_size,

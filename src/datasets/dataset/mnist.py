@@ -7,9 +7,7 @@ from __future__ import print_function
 
 import os
 
-import tensorflow as tf
 from tflibs.datasets import BaseDataset, ImageSpec, LabelSpec
-from tflibs.ops import normalize
 
 
 class MNIST(BaseDataset):
@@ -25,17 +23,6 @@ class MNIST(BaseDataset):
             'image': ImageSpec([28, 28, 1]),
             'label': LabelSpec(10),
         }
-
-    @staticmethod
-    def map_fn(image, label, _id):
-        return {
-                   'image': tf.image.convert_image_dtype(image, tf.float32),
-                   '_id': _id,
-               }, tf.to_float(label)
-
-    @staticmethod
-    def eval_map_fn(*args, **kwargs):
-        return MNIST.map_fn(*args, **kwargs)
 
 
 export = MNIST

@@ -6,6 +6,7 @@ import tensorflow as tf
 from tflibs.model import Model
 from tflibs.training import Optimizer, Dispatcher
 from tflibs.utils import param_consumer
+from tflibs.ops import normalize
 
 from networks.deep_conv_net import DeepConvNet as DCN
 
@@ -102,6 +103,17 @@ class DeepConvNet(Model):
             return DeepConvNet.predict(features, **model_args)
         else:
             raise ValueError
+
+    @staticmethod
+    def map_fn(image, label, _id):
+        return {
+                   'image': normalize(image),
+                   '_id': _id,
+               }, tf.to_float(label)
+
+    @staticmethod
+    def eval_map_fn(*args, **kwargs):
+        return DeepConvNet.map_fn(*args, **kwargs)
 
     @classmethod
     def add_train_args(cls, argparser, parse_args):
