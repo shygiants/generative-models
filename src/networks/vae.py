@@ -26,8 +26,6 @@ class Encoder(Network):
         num_hidden = self.hparams.num_hidden
 
         with tf.variable_scope(self.scope, values=[inputs], reuse=tf.AUTO_REUSE):
-            # TODO: Implement
-            # TODO: Initialization
             with arg_scope([tf.layers.dense],
                            kernel_initializer=tf.initializers.random_normal(stddev=0.1),
                            bias_initializer=tf.initializers.random_normal(stddev=0.1)):
@@ -57,7 +55,6 @@ class Decoder(Network):
         data_size = self.hparams.data_size
 
         with tf.variable_scope(self.scope, values=[inputs], reuse=tf.AUTO_REUSE):
-            # TODO: Implement
             with arg_scope([tf.layers.dense],
                            kernel_initializer=tf.initializers.random_normal(stddev=0.1),
                            bias_initializer=tf.initializers.random_normal(stddev=0.1)):

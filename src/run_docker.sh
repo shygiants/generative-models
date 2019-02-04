@@ -108,9 +108,6 @@ else
 fi
 
 # Check command
-CMD=$1
-shift
-
 if [ -z "$NO_BUILD" ]; then
     echo "Building Docker image..."
     if [ -z "$NO_BUILD_ARGS" ] && [ -f ${DOCKERFILE_DIR}/build-args.env ]; then

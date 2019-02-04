@@ -7,7 +7,7 @@ from tflibs.model import Model
 from tflibs.training import Optimizer, Dispatcher, Optimizers
 
 from networks.vae import Encoder, Decoder
-from tflibs.ops import concat_images
+from tflibs.ops import concat_images, normalize
 
 
 class VAE(Model):
@@ -128,6 +128,17 @@ class VAE(Model):
             return VAE.predict(features, **model_args)
         else:
             raise ValueError
+
+    @staticmethod
+    def map_fn(image, label, _id):
+        return {
+                   'image': normalize(image),
+                   '_id': _id,
+               }, tf.to_float(label)
+
+    @staticmethod
+    def eval_map_fn(*args, **kwargs):
+        return VAE.map_fn(*args, **kwargs)
 
     @classmethod
     def add_model_args(cls, argparser, parse_args):

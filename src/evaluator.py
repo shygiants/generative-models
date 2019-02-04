@@ -14,6 +14,7 @@ from tflibs.datasets import build_input_fn
 
 def run(job_dir,
         estimator: tf.estimator.Estimator,
+        model_cls,
         dataset,
         step,
         eval_index,
@@ -42,7 +43,7 @@ def run(job_dir,
         # Run evaluation
         tf.logging.info('Start evaluation for {}.'.format(step))
         estimator.evaluate(
-            build_input_fn(dataset_test, eval_batch_size, map_fn=strip_dict_arg(dataset.eval_map_fn),
+            build_input_fn(dataset_test, eval_batch_size, map_fn=strip_dict_arg(model_cls.eval_map_fn),
                            shuffle_and_repeat=False),
             hooks=[],
             checkpoint_path=checkpoint_path)
