@@ -21,7 +21,7 @@ def run(job_dir,
         #                                shape=[28, 28, 1],
         #                                name='input_image')
         z = tf.placeholder(dtype=tf.float32,
-                           shape=[3],
+                           shape=[100],
                            name='z')
         # image = normalize(decoded_image)
         # image = tf.expand_dims(image, axis=0)

@@ -70,7 +70,6 @@ class VAE(Model):
 
     @classmethod
     def train(cls, features: dict, learning_rate, **hparams):
-        # TODO: Optimizer
         optimizer = Optimizer(learning_rate, '', optimizer=Optimizers.AdaGrad)
 
         dispatcher = Dispatcher(cls, hparams, features, num_towers=1, model_parallelism=False)

@@ -31,7 +31,7 @@ class GAN(Model):
 
     @Model.image
     def sampled_images(self):
-        return tf.reshape(self.networks.decoder(self.features['z']), (28, 28, 1))
+        return tf.reshape(self.networks.generator(self.features['z']), (28, 28, 1))
 
     @Model.tensor
     def noise(self):
@@ -51,8 +51,10 @@ class GAN(Model):
 
     @Model.loss(summary='D_Loss')
     def d_loss(self):
-        d_loss_real = tf.losses.log_loss(tf.ones_like(self.logits_real), self.logits_real, scope='D_Loss_Real')
-        d_loss_fake = tf.losses.log_loss(tf.zeros_like(self.logits_fake), self.logits_fake, scope='D_Loss_Fake')
+        d_loss_real = tf.losses.log_loss(tf.ones_like(self.logits_real), self.logits_real, weights=0.5,
+                                         scope='D_Loss_Real')
+        d_loss_fake = tf.losses.log_loss(tf.zeros_like(self.logits_fake), self.logits_fake, weights=0.5,
+                                         scope='D_Loss_Fake')
 
         return d_loss_real + d_loss_fake
 
@@ -62,17 +64,12 @@ class GAN(Model):
 
     @classmethod
     def train(cls, features: dict, learning_rate, **hparams):
-        # TODO: Optimizer
-        optimizer_params = param_consumer(['momentum'], hparams)
-
         def decay_fn(gs, lr):
             return lr * (1 / 1.000004 ** gs)
 
-        d_optimizer = Optimizer(learning_rate, 'Discriminator', optimizer=Optimizers.Momentum,
-                                optimizer_params=optimizer_params, decay_policy='lambda',
+        d_optimizer = Optimizer(learning_rate, 'Discriminator', decay_policy='lambda',
                                 decay_params={'lr_fn': decay_fn})
-        g_optimizer = Optimizer(learning_rate, 'Generator', optimizer=Optimizers.Momentum,
-                                optimizer_params=optimizer_params, decay_policy='lambda',
+        g_optimizer = Optimizer(learning_rate, 'Generator', decay_policy='lambda',
                                 decay_params={'lr_fn': decay_fn})
 
         dispatcher = Dispatcher(cls, hparams, features, num_towers=1, model_parallelism=False)
@@ -111,7 +108,7 @@ class GAN(Model):
         chief = cls(features, device=gpu_eval if gpu_eval is not None else 0, **hparams)
 
         predictions = {
-            'sample': tf.image.convert_image_dtype(chief.sampled_images, tf.uint8)
+            'sample': chief.sampled_images
         }
 
         return tf.estimator.EstimatorSpec(tf.estimator.ModeKeys.PREDICT,
@@ -161,14 +158,10 @@ class GAN(Model):
                                type=int,
                                default=100,
                                help='The dimension of latent `z`')
-        argparser.add_argument('--num-hidden',
+        argparser.add_argument('--num-filters',
                                type=int,
-                               default=1200,
+                               default=64,
                                help='The number of hidden units')
-        argparser.add_argument('--data-size',
-                               type=int,
-                               default=28 * 28 * 1,
-                               help='The size of data')
 
     @classmethod
     def add_train_args(cls, argparser, parse_args):

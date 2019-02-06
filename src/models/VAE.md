@@ -3,7 +3,7 @@
 An implementation of variational auto-encoder (VAE) for MNIST which is decribed in the paper [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114) written by D. P. Kingma et al.
 
 ## Demo
-See a demo on my personal website [Sanghoon Yoon](https://shygiants.github.io/#paper-implements).
+See a demo on my personal website [Sanghoon Yoon](https://shygiants.github.io/#paper-implements/1).
 
 ## Code
 * [VAE Model](/src/models/vae.py)
